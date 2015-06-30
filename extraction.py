@@ -10,16 +10,17 @@ from skimage import measure
 from skimage import transform
 
 def check_letter(contour):
-        xmax = max(contour[:, 1])
-        xmin = min(contour[:, 1])
-        ymax = max(contour[:, 0])
-        ymin = min(contour[:, 0])
-        dx = abs(xmax-xmin)
-        dy = abs(ymax-ymin)
-        if dx>10 and dy>10:
-            return True
-        else:
-            return False
+    """Check if an contour seems like letter"""
+    xmax = max(contour[:, 1])
+    xmin = min(contour[:, 1])
+    ymax = max(contour[:, 0])
+    ymin = min(contour[:, 0])
+    dx = abs(xmax-xmin)
+    dy = abs(ymax-ymin)
+    if dx>10 and dy>10:
+        return True
+    else:
+        return False
 
 def save_contour_images(image, contours):
     """save the image within contours for training"""
@@ -57,7 +58,7 @@ def process_image(imgfile):
 
     '''Display the image and plot all contours found'''
     fig, ax = plt.subplots()
-    ax.imshow(img0, interpolation='nearest', cmap=plt.cm.gray)
+    ax.imshow(img1, interpolation='nearest', cmap=plt.cm.gray)
 
     # plot contours
     nletters = 0
@@ -70,8 +71,8 @@ def process_image(imgfile):
     plt.show()
 
 
-#process_image('data/memes/blb-1.jpg')
+process_image('data/memes/blb-1.jpg')
 
-for imgfile in os.listdir('data/memes/'):
-    print 'Processing image: '+imgfile
-    process_image('data/memes/'+imgfile)
+#for imgfile in os.listdir('data/memes/'):
+#    print 'Processing image: '+imgfile
+#    process_image('data/memes/'+imgfile)
