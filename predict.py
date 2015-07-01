@@ -132,5 +132,9 @@ def read_meme(memeimg, draw=False):
 
 if __name__ == '__main__':
     read_meme('data/memes/ida-4.jpg', draw=True)
-    # for memeimg in os.listdir('data/memes/'):
-    #     read_meme('data/memes/' + memeimg)
+    # for d in os.listdir('data/meme-themes/'):
+    #     print '======================'
+    #     print d
+    #     print '======================'
+    #     for f in os.listdir('data/meme-themes/'+d+'/'):
+    #         read_meme('data/meme-themes/' + d + '/' + f, draw=False)
