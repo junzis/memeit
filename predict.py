@@ -1,3 +1,4 @@
+import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -71,60 +72,65 @@ pca = pickle.load(open('data/clfs/pca.pkl', 'rb'))
 # y_pred = estimator.predict(pca.transform(X_test))
 # print(classification_report(y_test, y_pred))
 
-#########################################################
-## Analyse real image
-ltrimgs, imgcenters = process_image('data/memes/ida-2.jpg')
-ltrcenters = np.asarray(imgcenters)
-letters = []
-probs = []
+def read_meme(memeimg, draw=False):
+    # Analyse MEME image
+    ltrimgs, imgcenters = process_image(memeimg)
+    ltrcenters = np.asarray(imgcenters)
+    letters = []
+    probs = []
 
-results = estimator.predict_proba(pca.transform(ltrimgs))
-classes = estimator.classes_
+    results = estimator.predict_proba(pca.transform(ltrimgs))
+    classes = estimator.classes_
 
-for r in results:
-    i = np.argsort(r)[-1]
-    letters.append(classes[i])
-    probs.append(r[i])
+    for r in results:
+        i = np.argsort(r)[-1]
+        letters.append(classes[i])
+        probs.append(r[i])
 
-letters = np.asarray(letters)
-probs = np.asarray(probs)
+    letters = np.asarray(letters)
+    probs = np.asarray(probs)
 
-# apply clustering methord to align letters to rows
-X = np.array(zip(ltrcenters[:, 1], np.zeros(len(ltrcenters))), dtype=np.int)
-ms = MeanShift(bandwidth=5, bin_seeding=True)
-ms.fit(X)
-labels = ms.labels_
-cluster_centers = ms.cluster_centers_
+    # apply clustering methord to align letters to rows
+    X = np.array(zip(ltrcenters[:, 1], np.zeros(len(ltrcenters))), dtype=np.int)
+    ms = MeanShift(bandwidth=5, bin_seeding=True)
+    ms.fit(X)
+    labels = ms.labels_
+    cluster_centers = ms.cluster_centers_
 
-labels_unique = np.unique(labels)
-n_clusters_ = len(labels_unique)
+    labels_unique = np.unique(labels)
+    n_clusters_ = len(labels_unique)
 
-for k in range(n_clusters_):
-    members = (labels == k)
-    ltrcenters[members, 1] = int(cluster_centers[k][0])
+    for k in range(n_clusters_):
+        members = (labels == k)
+        ltrcenters[members, 1] = int(cluster_centers[k][0])
 
-ids = np.lexsort((ltrcenters[:,0], ltrcenters[:,1]))
+    ids = np.lexsort((ltrcenters[:,0], ltrcenters[:,1]))
 
-# print zip(letters[ids], ltrcenters[ids, 0].tolist())
+    # print zip(letters[ids], ltrcenters[ids, 0].tolist())
 
-# get the text output, in lowercase
-letters_sort = letters[ids]
-probs_sort = probs[ids]
-words = ''
-for l in zip(letters_sort, probs_sort):
-    if l[1] > 0.5:      # only keep prob > 50%
-        words += l[0]
-print infer_spaces(words.lower())
+    # get the text output, in lowercase
+    letters_sort = letters[ids]
+    probs_sort = probs[ids]
+    words = ''
+    for l in zip(letters_sort, probs_sort):
+        if l[1] > 0.4:      # only keep prob > 40%
+            words += l[0]
+    print infer_spaces(words.lower())
 
-# plot the letters
-plt.plot(ltrcenters[:, 0], ltrcenters[:, 1], '.', color='blue')
-for l in zip(imgcenters, letters, probs):
-    if l[2] > 0.5:
-        plt.text(l[0][0], l[0][1], l[1], color='black', weight='bold')
-        plt.text(l[0][0], l[0][1]+15, "{0:.2f}".format(l[2]), color='green', size=10)
-    else:
-        plt.text(l[0][0], l[0][1], l[1], color='black', alpha=0.3)
-        plt.text(l[0][0], l[0][1]+15, "{0:.2f}".format(l[2]), color='red', size=10, alpha=0.3)
-plt.gca().invert_yaxis()
-plt.show()
+    # draw the letters
+    if draw:
+        plt.plot(ltrcenters[:, 0], ltrcenters[:, 1], '.', color='blue')
+        for l in zip(imgcenters, letters, probs):
+            if l[2] > 0.4:
+                plt.text(l[0][0], l[0][1], l[1], color='black', weight='bold')
+                plt.text(l[0][0], l[0][1]+15, "{0:.2f}".format(l[2]), color='green', size=10)
+            else:
+                plt.text(l[0][0], l[0][1], l[1], color='black', alpha=0.5)
+                plt.text(l[0][0], l[0][1]+15, "{0:.2f}".format(l[2]), color='red', size=10, alpha=0.5)
+        plt.gca().invert_yaxis()
+        plt.show()
 
+if __name__ == '__main__':
+    read_meme('data/memes/ida-4.jpg', draw=True)
+    # for memeimg in os.listdir('data/memes/'):
+    #     read_meme('data/memes/' + memeimg)
